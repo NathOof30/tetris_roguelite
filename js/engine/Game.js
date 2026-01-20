@@ -63,6 +63,9 @@ export class Game extends EventEmitter {
         // Animation frame ID
         this.animationId = null;
 
+        // Roguelite system reference (set externally)
+        this.rogueliteSystem = null;
+
         // Bind methods
         this.gameLoop = this.gameLoop.bind(this);
     }
@@ -80,7 +83,14 @@ export class Game extends EventEmitter {
         ];
         const levelIndex = Math.min(this.level - 1, framesPerDrop.length - 1);
         // Convert frames (60fps) to milliseconds
-        return (framesPerDrop[levelIndex] / 60) * 1000;
+        let interval = (framesPerDrop[levelIndex] / 60) * 1000;
+
+        // Apply roguelite modifiers if available
+        if (this.rogueliteSystem) {
+            interval = this.rogueliteSystem.getModifiedDropInterval(interval);
+        }
+
+        return interval;
     }
 
     /**

@@ -32,12 +32,21 @@ export class Menu {
         this.container = container;
         this.currentScreen = null;
         this.callbacks = {};
+        this.debugPanel = null;
 
         // Bind methods
         this.handleKeyDown = this.handleKeyDown.bind(this);
 
         // Event listeners
         window.addEventListener('keydown', this.handleKeyDown);
+    }
+
+    /**
+     * Set reference to debug panel
+     * @param {DebugPanel} debugPanel
+     */
+    setDebugPanel(debugPanel) {
+        this.debugPanel = debugPanel;
     }
 
     /**
@@ -264,6 +273,21 @@ export class Menu {
             'Mode Daltonien',
             config.get('accessibility.colorblindMode'),
             (checked) => config.set('accessibility.colorblindMode', checked)
+        ));
+
+        // Debug Roguelite
+        options.appendChild(this.createToggleOption(
+            '🔧 Debug Roguelite',
+            config.get('debug.roguelite') || false,
+            (checked) => {
+                if (this.debugPanel) {
+                    if (checked) {
+                        this.debugPanel.show();
+                    } else {
+                        this.debugPanel.hide();
+                    }
+                }
+            }
         ));
 
         menu.appendChild(options);

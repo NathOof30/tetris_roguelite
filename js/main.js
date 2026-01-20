@@ -12,6 +12,9 @@ import { Stats } from './ui/Stats.js';
 import { AudioManager } from './audio/AudioManager.js';
 import config from './utils/Config.js';
 import { globalEvents } from './utils/EventEmitter.js';
+import { RogueliteSystem } from './roguelite/RogueliteSystem.js';
+import { RogueliteHUD } from './ui/RogueliteHUD.js';
+import { DebugPanel } from './ui/DebugPanel.js';
 
 /**
  * Main Tetris Application
@@ -25,6 +28,9 @@ class TetrisApp {
         this.menu = null;
         this.stats = null;
         this.audio = null;
+        this.roguelite = null;
+        this.rogueliteHUD = null;
+        this.debugPanel = null;
 
         this.elements = {};
 
@@ -84,6 +90,21 @@ class TetrisApp {
         // Initialize menu
         this.menu = new Menu(this.elements.menuContainer);
         this.setupMenuCallbacks();
+
+        // Initialize roguelite system
+        this.roguelite = new RogueliteSystem({
+            bonusThreshold: 1000,  // Offer bonus every 1000 points
+            dealThreshold: 10      // Force malus after 10 pieces without clear
+        });
+        this.roguelite.init(this.game);
+        this.game.rogueliteSystem = this.roguelite;
+
+        // Initialize roguelite HUD (deal gauge + active modifiers)
+        this.rogueliteHUD = new RogueliteHUD(this.elements.gameContainer);
+
+        // Initialize debug panel (hidden by default)
+        this.debugPanel = new DebugPanel(this.roguelite, this.game);
+        this.menu.setDebugPanel(this.debugPanel);
 
         // Set up global event listeners
         this.setupEventListeners();
@@ -218,9 +239,25 @@ class TetrisApp {
      */
     quitGame() {
         this.game.destroy();
+        this.roguelite.destroy();
+        this.debugPanel.destroy();
+
         this.game = new Game();
         this.keyboard.game = this.game;
         this.touch.game = this.game;
+
+        // Reinitialize roguelite for new game
+        this.roguelite = new RogueliteSystem({
+            bonusThreshold: 1000,
+            dealThreshold: 10
+        });
+        this.roguelite.init(this.game);
+        this.game.rogueliteSystem = this.roguelite;
+
+        // Reinitialize debug panel with new references
+        this.debugPanel = new DebugPanel(this.roguelite, this.game);
+        this.menu.setDebugPanel(this.debugPanel);
+
         this.showMainMenu();
     }
 }
