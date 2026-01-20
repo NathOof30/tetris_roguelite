@@ -1,0 +1,282 @@
+/**
+ * Game CSS - Game board, pieces, and gameplay elements
+ * Tetris Professional Edition
+ */
+
+/* ===== Game Container ===== */
+#game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-xl);
+    min-height: 100vh;
+    padding: var(--spacing-lg);
+    position: relative;
+}
+
+#game-container.playing #game-area {
+    opacity: 1;
+}
+
+/* ===== Game Area ===== */
+#game-area {
+    display: flex;
+    gap: var(--spacing-xl);
+    align-items: flex-start;
+    opacity: 0.3;
+    transition: opacity var(--transition-normal);
+}
+
+/* ===== Side Panels ===== */
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    min-width: 120px;
+}
+
+.side-panel.left {
+    align-items: flex-end;
+}
+
+.side-panel.right {
+    align-items: flex-start;
+}
+
+/* ===== Panel Boxes ===== */
+.panel-box {
+    background: var(--color-bg-glass);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-md);
+}
+
+.panel-box h3 {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--spacing-sm);
+    text-align: center;
+}
+
+/* ===== Hold Piece ===== */
+.hold-box {
+    width: 100px;
+}
+
+#hold-canvas {
+    width: 80px;
+    height: 60px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* ===== Next Pieces ===== */
+.next-box {
+    width: 100px;
+}
+
+#next-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    align-items: center;
+}
+
+.next-piece-canvas {
+    display: block;
+}
+
+/* ===== Stats Panel ===== */
+.stats-box {
+    min-width: 140px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--spacing-md);
+}
+
+.stat-item:last-child {
+    margin-bottom: 0;
+}
+
+.stat-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    font-family: var(--font-family-mono);
+    color: var(--color-text-primary);
+}
+
+#score-value {
+    font-size: var(--font-size-2xl);
+    color: var(--color-accent-primary);
+    text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+}
+
+/* ===== Game Board ===== */
+.game-board-container {
+    position: relative;
+}
+
+#game-canvas {
+    display: block;
+    border-radius: var(--border-radius-md);
+    box-shadow:
+        var(--shadow-lg),
+        inset 0 0 60px rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+/* Board border glow */
+.game-board-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg,
+            var(--color-accent-primary),
+            var(--color-accent-secondary),
+            var(--color-accent-tertiary),
+            var(--color-accent-primary));
+    border-radius: var(--border-radius-md);
+    z-index: -1;
+    opacity: 0.6;
+    filter: blur(4px);
+}
+
+/* ===== Notification ===== */
+#notification {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    transform: translateX(0);
+    background: transparent;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-accent-primary);
+    text-shadow:
+        0 0 8px rgba(0, 0, 0, 0.8),
+        0 0 4px currentColor;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-fast);
+    z-index: 100;
+}
+
+#notification.show {
+    opacity: 1;
+    animation: slideInLeft 0.2s ease;
+}
+
+#notification.level-up {
+    color: var(--color-accent-secondary);
+    font-size: var(--font-size-xl);
+    text-shadow:
+        0 0 12px rgba(0, 0, 0, 0.9),
+        0 0 6px currentColor;
+}
+
+/* ===== Line Clear Effect ===== */
+.line-clear-flash {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.8),
+            transparent);
+    animation: shimmer 0.3s linear;
+    pointer-events: none;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 900px) {
+    #game-area {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .side-panel {
+        flex-direction: row;
+        min-width: auto;
+        gap: var(--spacing-md);
+    }
+
+    .side-panel.left,
+    .side-panel.right {
+        align-items: center;
+    }
+}
+
+@media (max-width: 600px) {
+    #game-container {
+        padding: var(--spacing-sm);
+    }
+
+    .panel-box {
+        padding: var(--spacing-sm);
+    }
+
+    .panel-box h3 {
+        font-size: var(--font-size-xs);
+    }
+
+    .hold-box,
+    .next-box {
+        width: 70px;
+    }
+
+    #hold-canvas {
+        width: 60px;
+        height: 45px;
+    }
+
+    .stats-box {
+        min-width: 100px;
+    }
+
+    .stat-value {
+        font-size: var(--font-size-lg);
+    }
+
+    #score-value {
+        font-size: var(--font-size-xl);
+    }
+}
+
+/* ===== Touch Controls Hint ===== */
+@media (pointer: coarse) {
+    .touch-hint {
+        display: block;
+        position: absolute;
+        bottom: var(--spacing-md);
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+        text-align: center;
+    }
+}
+
+@media (pointer: fine) {
+    .touch-hint {
+        display: none;
+    }
+}

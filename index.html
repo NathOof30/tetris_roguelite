@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Tetris Professional Edition - Un jeu Tetris complet et professionnel pour navigateur web">
+  <meta name="theme-color" content="#0a0a12">
+  
+  <title>Tetris - Professional Edition</title>
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/ui.css">
+  
+  <!-- Favicon (inline SVG) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='10' y='10' width='35' height='35' fill='%2300f5ff'/><rect x='55' y='10' width='35' height='35' fill='%23ffea00'/><rect x='10' y='55' width='35' height='35' fill='%23b24bf3'/><rect x='55' y='55' width='35' height='35' fill='%23f43f5e'/></svg>">
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#game-canvas" class="visually-hidden">Aller au jeu</a>
+  
+  <!-- Main Game Container -->
+  <main id="game-container" role="application" aria-label="Jeu Tetris">
+    <div id="game-area">
+      <!-- Left Side Panel -->
+      <aside class="side-panel left" aria-label="Pièce en réserve et statistiques">
+        <!-- Hold Piece -->
+        <div class="panel-box hold-box">
+          <h3 id="hold-label">Réserve</h3>
+          <canvas id="hold-canvas" width="80" height="60" aria-labelledby="hold-label"></canvas>
+        </div>
+        
+        <!-- Statistics -->
+        <div class="panel-box stats-box">
+          <div class="stat-item">
+            <span class="stat-label">Score</span>
+            <span class="stat-value" id="score-value" aria-live="polite">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Niveau</span>
+            <span class="stat-value" id="level-value">1</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Lignes</span>
+            <span class="stat-value" id="lines-value">0</span>
+          </div>
+        </div>
+      </aside>
+      
+      <!-- Game Board -->
+      <div class="game-board-container">
+        <canvas 
+          id="game-canvas" 
+          width="300" 
+          height="600"
+          role="img"
+          aria-label="Grille de jeu Tetris"
+          tabindex="0"
+        ></canvas>
+        <div id="notification" aria-live="assertive"></div>
+      </div>
+      
+      <!-- Right Side Panel -->
+      <aside class="side-panel right" aria-label="Prochaines pièces">
+        <!-- Next Pieces -->
+        <div class="panel-box next-box">
+          <h3 id="next-label">Suivant</h3>
+          <div id="next-container" aria-labelledby="next-label"></div>
+        </div>
+      </aside>
+    </div>
+    
+    <!-- Touch controls hint (mobile only) -->
+    <p class="touch-hint">
+      Tap gauche/droite pour déplacer • Tap centre pour rotation • Swipe bas pour drop
+    </p>
+  </main>
+  
+  <!-- Menu Container -->
+  <div id="menu-container" class="menu-container active" role="dialog" aria-modal="true" aria-label="Menu du jeu"></div>
+  
+  <!-- JavaScript Module -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

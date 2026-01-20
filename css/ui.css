@@ -1,0 +1,475 @@
+/**
+ * UI CSS - Menus, buttons, forms, and overlays
+ * Tetris Professional Edition
+ */
+
+/* ===== Menu Container ===== */
+.menu-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(10, 10, 18, 0.95);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity var(--transition-normal),
+        visibility var(--transition-normal);
+}
+
+.menu-container.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* ===== Menu Panel ===== */
+.menu {
+    background: var(--color-bg-glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-xl);
+    padding: var(--spacing-2xl);
+    max-width: 450px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    animation: fadeInUp 0.4s ease;
+}
+
+.menu h2 {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+    color: var(--color-text-primary);
+}
+
+/* ===== Game Logo ===== */
+.game-logo {
+    font-size: var(--font-size-4xl);
+    text-align: center;
+    margin-bottom: var(--spacing-sm);
+    letter-spacing: 0.1em;
+}
+
+.game-logo span {
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
+.logo-t {
+    color: var(--color-piece-I);
+    animation-delay: 0s;
+}
+
+.logo-e {
+    color: var(--color-piece-O);
+    animation-delay: 0.1s;
+}
+
+.logo-t2 {
+    color: var(--color-piece-T);
+    animation-delay: 0.2s;
+}
+
+.logo-r {
+    color: var(--color-piece-S);
+    animation-delay: 0.3s;
+}
+
+.logo-i {
+    color: var(--color-piece-J);
+    animation-delay: 0.4s;
+}
+
+.logo-s {
+    color: var(--color-piece-L);
+    animation-delay: 0.5s;
+}
+
+.game-subtitle {
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-2xl);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+/* ===== Menu Buttons ===== */
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.menu-button {
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    font-family: inherit;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-lg);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    transition: left var(--transition-slow);
+}
+
+.menu-button:hover {
+    border-color: var(--color-accent-primary);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.menu-button:hover::before {
+    left: 100%;
+}
+
+.menu-button:active {
+    transform: translateY(0);
+}
+
+.menu-button.primary {
+    background: linear-gradient(135deg,
+            var(--color-accent-primary),
+            var(--color-accent-secondary));
+    border: none;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.menu-button.primary:hover {
+    box-shadow: 0 0 30px rgba(0, 245, 255, 0.4);
+}
+
+.menu-button.secondary {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--color-text-secondary);
+}
+
+.menu-button.secondary:hover {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+}
+
+/* ===== Menu Instructions ===== */
+.menu-instructions {
+    margin-top: var(--spacing-2xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.menu-instructions p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* ===== Options Menu ===== */
+.options-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: var(--spacing-sm);
+}
+
+.option-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.option-label {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-md);
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 13px;
+    transition: var(--transition-fast);
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+}
+
+.toggle-switch input:checked+.toggle-slider {
+    background: var(--color-accent-primary);
+}
+
+.toggle-switch input:checked+.toggle-slider::before {
+    transform: translateX(24px);
+}
+
+/* Slider */
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.slider {
+    width: 100px;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--color-accent-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 10px var(--color-accent-primary);
+}
+
+.slider-value {
+    min-width: 35px;
+    text-align: right;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+/* ===== Controls Menu ===== */
+.controls-list {
+    margin-bottom: var(--spacing-xl);
+}
+
+.control-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.control-action {
+    color: var(--color-text-secondary);
+}
+
+.control-keys {
+    font-family: var(--font-family-mono);
+    color: var(--color-accent-primary);
+    background: rgba(0, 245, 255, 0.1);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+}
+
+/* ===== High Scores Menu ===== */
+.highscores-list {
+    margin-bottom: var(--spacing-xl);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.highscore-row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto auto;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    align-items: center;
+}
+
+.score-rank {
+    font-weight: 700;
+    color: var(--color-accent-secondary);
+}
+
+.score-name {
+    color: var(--color-text-primary);
+}
+
+.score-value {
+    font-family: var(--font-family-mono);
+    font-weight: 700;
+    color: var(--color-accent-primary);
+}
+
+.score-details {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.no-scores {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: var(--spacing-xl);
+}
+
+/* ===== Game Over Menu ===== */
+.gameover-title {
+    color: var(--color-accent-tertiary);
+    text-shadow: 0 0 20px currentColor;
+}
+
+.gameover-stats {
+    margin-bottom: var(--spacing-xl);
+}
+
+.gameover-stats .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.gameover-stats .stat-label {
+    color: var(--color-text-secondary);
+}
+
+.gameover-stats .stat-value {
+    font-family: var(--font-family-mono);
+    font-weight: 700;
+}
+
+.gameover-stats .stat-value.score {
+    color: var(--color-accent-primary);
+    font-size: var(--font-size-xl);
+}
+
+.highscore-notice {
+    text-align: center;
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg,
+            rgba(255, 234, 0, 0.2),
+            rgba(247, 115, 22, 0.2));
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-xl);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+.highscore-notice span {
+    color: var(--color-piece-O);
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+}
+
+/* ===== Pause Menu ===== */
+.pause-hint {
+    margin-top: var(--spacing-xl);
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+/* ===== Scrollbar Styling ===== */
+.options-list::-webkit-scrollbar,
+.highscores-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.options-list::-webkit-scrollbar-track,
+.highscores-list::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+}
+
+.options-list::-webkit-scrollbar-thumb,
+.highscores-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.options-list::-webkit-scrollbar-thumb:hover,
+.highscores-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== Focus Styles ===== */
+.menu-button:focus-visible,
+.toggle-switch input:focus-visible+.toggle-slider,
+.slider:focus-visible {
+    outline: 2px solid var(--color-accent-primary);
+    outline-offset: 2px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 500px) {
+    .menu {
+        padding: var(--spacing-xl);
+        border-radius: var(--border-radius-lg);
+    }
+
+    .game-logo {
+        font-size: var(--font-size-3xl);
+    }
+
+    .menu-button {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-md);
+    }
+
+    .highscore-row {
+        grid-template-columns: 30px 1fr auto;
+    }
+
+    .score-details {
+        display: none;
+    }
+}
