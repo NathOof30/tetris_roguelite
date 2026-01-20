@@ -129,8 +129,8 @@ export class Board {
     clearLines() {
         const completedRows = [];
 
-        // Find completed rows
-        for (let row = this.totalHeight - 1; row >= 0; row--) {
+        // Find completed rows (save their ORIGINAL indices before any modification)
+        for (let row = 0; row < this.totalHeight; row++) {
             if (this.grid[row].every(cell => cell)) {
                 completedRows.push(row);
             }
@@ -140,23 +140,38 @@ export class Board {
             return { count: 0, rows: [] };
         }
 
-        // Emit event for animation
+        // Emit event for animation (before modifying grid)
         globalEvents.emit('linesClearing', completedRows);
 
-        // CRITICAL FIX: Sort rows in descending order to avoid index shifting issues
-        // When removing rows, we must start from the bottom to prevent indices from changing
-        completedRows.sort((a, b) => b - a);
+        // CRITICAL FIX: Use filter approach instead of splice/unshift
+        // This completely avoids index shifting issues
+        const completedRowsSet = new Set(completedRows);
 
-        // Remove completed rows and add empty rows at top
-        for (const row of completedRows) {
-            this.grid.splice(row, 1);
-            this.colors.splice(row, 1);
-            this.patterns.splice(row, 1);
+        // Filter out completed rows to keep only non-completed rows
+        const newGrid = [];
+        const newColors = [];
+        const newPatterns = [];
 
-            this.grid.unshift(Array(this.width).fill(null));
-            this.colors.unshift(Array(this.width).fill(null));
-            this.patterns.unshift(Array(this.width).fill(null));
+        for (let row = 0; row < this.totalHeight; row++) {
+            if (!completedRowsSet.has(row)) {
+                newGrid.push(this.grid[row]);
+                newColors.push(this.colors[row]);
+                newPatterns.push(this.patterns[row]);
+            }
         }
+
+        // Add empty rows at the top to maintain grid size
+        const emptyRowsNeeded = completedRows.length;
+        for (let i = 0; i < emptyRowsNeeded; i++) {
+            newGrid.unshift(Array(this.width).fill(null));
+            newColors.unshift(Array(this.width).fill(null));
+            newPatterns.unshift(Array(this.width).fill(null));
+        }
+
+        // Replace the grids
+        this.grid = newGrid;
+        this.colors = newColors;
+        this.patterns = newPatterns;
 
         return { count: completedRows.length, rows: completedRows };
     }

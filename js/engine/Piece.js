@@ -271,7 +271,9 @@ export class PieceBag {
         while (this.pieces.length < count) {
             this.refill();
         }
-        return this.pieces.slice(0, count);
+        // CRITICAL FIX: Return a copy to prevent live updates during rendering
+        // Without this, the display would change as the bag refills during gameplay
+        return [...this.pieces.slice(0, count)];
     }
 }
 
