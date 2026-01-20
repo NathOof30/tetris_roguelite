@@ -141,7 +141,16 @@ export class Renderer {
      * @param {Object} options - Draw options
      */
     drawCell(x, y, color, options = {}) {
-        const { ghost = false, pattern = null, colorblind = false } = options;
+        const {
+            ghost = false,
+            pattern = null,
+            colorblind = false,
+            isGold = false,
+            isRusted = false,
+            isCracked = false,
+            isCleaner = false
+        } = options;
+
         const size = this.cellSize - this.padding * 2;
         const px = x * this.cellSize + this.padding;
         const py = y * this.cellSize + this.padding;
@@ -154,8 +163,16 @@ export class Renderer {
             return;
         }
 
+        // Determine actual color based on special states
+        let displayColor = color;
+        if (isGold) {
+            displayColor = '#ffd700'; // Gold
+        } else if (isRusted) {
+            displayColor = '#8b4513'; // Rust brown
+        }
+
         // Main cell color
-        this.ctx.fillStyle = color;
+        this.ctx.fillStyle = displayColor;
         this.ctx.fillRect(px, py, size, size);
 
         // Gradient highlight
@@ -181,6 +198,50 @@ export class Renderer {
         this.ctx.lineTo(px + size, py + size);
         this.ctx.lineTo(px, py + size);
         this.ctx.stroke();
+
+        // Special effects for special blocks
+        if (isGold) {
+            // Gold sparkle effect
+            this.ctx.fillStyle = 'rgba(255, 255, 200, 0.6)';
+            this.ctx.beginPath();
+            this.ctx.arc(px + size * 0.3, py + size * 0.3, 2, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.beginPath();
+            this.ctx.arc(px + size * 0.7, py + size * 0.5, 1.5, 0, Math.PI * 2);
+            this.ctx.fill();
+        }
+
+        if (isCracked) {
+            // Cracked stone effect
+            this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(px + size * 0.2, py);
+            this.ctx.lineTo(px + size * 0.5, py + size * 0.4);
+            this.ctx.lineTo(px + size * 0.3, py + size);
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.moveTo(px + size * 0.5, py + size * 0.4);
+            this.ctx.lineTo(px + size * 0.8, py + size * 0.7);
+            this.ctx.stroke();
+        }
+
+        if (isRusted) {
+            // Rust texture
+            this.ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
+            for (let i = 0; i < 5; i++) {
+                const rx = px + (i * size / 5) + 2;
+                const ry = py + ((i * 7) % size);
+                this.ctx.fillRect(rx, ry, 3, 3);
+            }
+        }
+
+        if (isCleaner) {
+            // Cleaner glow effect
+            this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
+            this.ctx.lineWidth = 2;
+            this.ctx.strokeRect(px + 2, py + 2, size - 4, size - 4);
+        }
 
         // Colorblind pattern
         if (colorblind && pattern) {
@@ -245,15 +306,20 @@ export class Renderer {
      * @param {Object} boardData - Board grid data
      */
     drawBoard(boardData) {
-        const { grid, colors, patterns } = boardData;
+        const { grid } = boardData;
         const colorblind = config.get('accessibility.colorblindMode');
 
         for (let y = 0; y < grid.length; y++) {
             for (let x = 0; x < grid[y].length; x++) {
-                if (grid[y][x]) {
-                    this.drawCell(x, y, colors[y][x], {
-                        pattern: patterns[y][x],
-                        colorblind
+                const pixel = grid[y][x];
+                if (pixel && pixel.filled !== false) {
+                    this.drawCell(x, y, pixel.color, {
+                        pattern: pixel.pattern,
+                        colorblind,
+                        isGold: pixel.isGold,
+                        isRusted: pixel.isRusted,
+                        isCracked: pixel.isCracked,
+                        isCleaner: pixel.isCleaner
                     });
                 }
             }

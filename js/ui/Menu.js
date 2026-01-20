@@ -85,12 +85,18 @@ export class Menu {
      * @param {Object} data - Additional data
      */
     show(screen, data = {}) {
+        // Track history if not going to main menu or if going deeper
+        if (screen !== MenuScreen.MAIN && screen !== this.currentScreen) {
+            this.previousScreen = this.currentScreen;
+        }
+
         this.currentScreen = screen;
         this.container.innerHTML = '';
         this.container.className = 'menu-container active';
 
         switch (screen) {
             case MenuScreen.MAIN:
+                this.previousScreen = null;
                 this.renderMainMenu();
                 break;
             case MenuScreen.OPTIONS:
@@ -293,7 +299,14 @@ export class Menu {
         menu.appendChild(options);
 
         // Back button
-        menu.appendChild(this.createButton('Retour', () => this.show(MenuScreen.MAIN), 'secondary'));
+        const backAction = () => {
+            if (this.previousScreen === MenuScreen.PAUSE) {
+                this.show(MenuScreen.PAUSE);
+            } else {
+                this.show(MenuScreen.MAIN);
+            }
+        };
+        menu.appendChild(this.createButton('Retour', backAction, 'secondary'));
 
         this.container.appendChild(menu);
     }

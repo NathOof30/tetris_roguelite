@@ -138,6 +138,12 @@ export class Piece {
         this.states = tetromino.states;
         this.rotation = 0;
 
+        // Special piece flags for roguelite modifiers
+        this.isGold = false;        // Gold piece (score multiplier, disables hold)
+        this.isUnstable = false;    // Unstable piece (granular gravity)
+        this.hasCleaner = false;    // Has cleaner pixel
+        this.isStone = false;       // Stone piece (health = 2)
+
         // Starting position (centered, above visible board)
         const shape = this.getShape();
         this.x = Math.floor((10 - shape[0].length) / 2);

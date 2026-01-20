@@ -3,16 +3,51 @@
  * Provides all available modifiers for selection
  */
 
+// Original modifiers
 import { LeGeometre } from './modifiers/LeGeometre.js';
 import { VitesseInstable } from './modifiers/VitesseInstable.js';
+
+// MIXED modifiers
+import { BlocDor } from './modifiers/BlocDor.js';
+import { GraviteGranulaire } from './modifiers/GraviteGranulaire.js';
+import { EchangeurRisque } from './modifiers/EchangeurRisque.js';
+import { LigneFantome } from './modifiers/LigneFantome.js';
+
+// MALUS modifiers
+import { Exorciste } from './modifiers/Exorciste.js';
+import { Verglas } from './modifiers/Verglas.js';
+import { PoidsRouille } from './modifiers/PoidsRouille.js';
+import { EcranReduit } from './modifiers/EcranReduit.js';
+
+// BONUS modifiers
+import { Maniaque } from './modifiers/Maniaque.js';
+import { PixelNettoyage } from './modifiers/PixelNettoyage.js';
+import { ReserveInfinie } from './modifiers/ReserveInfinie.js';
+import { SurchargeScore } from './modifiers/SurchargeScore.js';
+
 import { ModifierType } from './Modifier.js';
 
 /**
  * All available modifiers
  */
 const ALL_MODIFIERS = [
+    // Original
     LeGeometre,
-    VitesseInstable
+    VitesseInstable,
+    // MIXED (4)
+    BlocDor,
+    GraviteGranulaire,
+    EchangeurRisque,
+    LigneFantome,
+    // MALUS (4)
+    Exorciste,
+    Verglas,
+    PoidsRouille,
+    // BONUS (4)
+    Maniaque,
+    PixelNettoyage,
+    ReserveInfinie,
+    SurchargeScore
 ];
 
 /**
@@ -21,6 +56,8 @@ const ALL_MODIFIERS = [
 export class ModifierPool {
     constructor() {
         this.modifierClasses = [...ALL_MODIFIERS];
+        console.log(`[ModifierPool] Loaded ${this.modifierClasses.length} modifiers:`,
+            this.modifierClasses.map(M => new M().name));
     }
 
     /**
@@ -32,89 +69,55 @@ export class ModifierPool {
      * @returns {Modifier[]} Array of new modifier instances
      */
     getRandomModifiers(count = 3, { type = null, excludeIds = [] } = {}) {
-        // Filter available modifiers
         let available = this.modifierClasses.filter(ModClass => {
             const instance = new ModClass();
-
-            // Exclude by ID
-            if (excludeIds.includes(instance.id)) {
-                return false;
-            }
-
-            // Filter by type
-            if (type && instance.type !== type) {
-                return false;
-            }
-
+            if (excludeIds.includes(instance.id)) return false;
+            if (type && instance.type !== type) return false;
             return true;
         });
 
-        // Shuffle
         available = this.shuffle(available);
-
-        // Take requested count
         const selected = available.slice(0, count);
-
-        // Return new instances
         return selected.map(ModClass => new ModClass());
     }
 
     /**
-     * Get malus modifiers for deal system
-     * If not enough malus, include any available modifiers
+     * Get MALUS modifiers only (for deals)
      * @param {number} count - Number of modifiers
      * @param {string[]} excludeIds - IDs to exclude
      * @returns {Modifier[]}
      */
     getMalusModifiers(count = 3, excludeIds = []) {
-        let modifiers = this.getRandomModifiers(count, {
+        const result = this.getRandomModifiers(count, {
             type: ModifierType.MALUS,
             excludeIds
         });
-
-        // If not enough malus, fill with any available
-        if (modifiers.length < count) {
-            const additional = this.getRandomModifiers(count - modifiers.length, {
-                excludeIds: [...excludeIds, ...modifiers.map(m => m.id)]
-            });
-            modifiers = [...modifiers, ...additional];
-        }
-
-        return modifiers;
+        console.log(`[ModifierPool] getMalusModifiers: ${result.length} found`, result.map(m => m.name));
+        return result;
     }
 
     /**
-     * Get bonus or mixed modifiers for rewards
-     * If not enough, fill with any available modifiers
+     * Get BONUS or MIXED modifiers (for level ups)
      * @param {number} count - Number of modifiers
      * @param {string[]} excludeIds - IDs to exclude
      * @returns {Modifier[]}
      */
     getBonusModifiers(count = 3, excludeIds = []) {
-        // Get bonus and mixed modifiers first
+        // Get bonus and mixed modifiers
         let available = this.modifierClasses.filter(ModClass => {
             const instance = new ModClass();
-
-            if (excludeIds.includes(instance.id)) {
-                return false;
-            }
-
-            return instance.type === ModifierType.BONUS ||
+            if (excludeIds.includes(instance.id)) return false;
+            const match = instance.type === ModifierType.BONUS ||
                 instance.type === ModifierType.MIXED;
+            return match;
         });
 
+        console.log(`[ModifierPool] getBonusModifiers: ${available.length} available (BONUS+MIXED)`);
+
         available = this.shuffle(available);
-        let modifiers = available.slice(0, count).map(ModClass => new ModClass());
-
-        // If not enough bonus/mixed, fill with any available (including malus)
-        if (modifiers.length < count) {
-            const additional = this.getRandomModifiers(count - modifiers.length, {
-                excludeIds: [...excludeIds, ...modifiers.map(m => m.id)]
-            });
-            modifiers = [...modifiers, ...additional];
-        }
-
-        return modifiers;
+        const result = available.slice(0, count).map(ModClass => new ModClass());
+        console.log(`[ModifierPool] getBonusModifiers: returning ${result.length}`, result.map(m => m.name));
+        return result;
     }
 
     /**

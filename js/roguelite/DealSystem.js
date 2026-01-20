@@ -21,6 +21,8 @@ export class DealSystem {
         // Bind handlers
         this.handlePieceLocked = this.handlePieceLocked.bind(this);
         this.handleLinesCleared = this.handleLinesCleared.bind(this);
+        this.handleGaugeIncrease = this.handleGaugeIncrease.bind(this);
+        this.handleGaugeDecrease = this.handleGaugeDecrease.bind(this);
     }
 
     /**
@@ -29,6 +31,8 @@ export class DealSystem {
     init() {
         globalEvents.on('pieceLocked', this.handlePieceLocked);
         globalEvents.on('linesCleared', this.handleLinesCleared);
+        globalEvents.on('dealGaugeIncrease', this.handleGaugeIncrease);
+        globalEvents.on('dealGaugeDecrease', this.handleGaugeDecrease);
     }
 
     /**
@@ -38,12 +42,7 @@ export class DealSystem {
         if (this.isTriggered) return;
 
         this.piecesWithoutClear++;
-
-        globalEvents.emit('dealGaugeUpdate', {
-            current: this.piecesWithoutClear,
-            threshold: this.threshold,
-            percentage: this.getPercentage()
-        });
+        this.emitUpdate();
 
         if (this.piecesWithoutClear >= this.threshold) {
             this.trigger();
@@ -51,15 +50,45 @@ export class DealSystem {
     }
 
     /**
+     * Handle gauge increase from modifiers (e.g., Échangeur Risqué)
+     * @param {number} amount - Amount to increase
+     */
+    handleGaugeIncrease(amount) {
+        if (this.isTriggered) return;
+
+        this.piecesWithoutClear += amount;
+        this.emitUpdate();
+
+        if (this.piecesWithoutClear >= this.threshold) {
+            this.trigger();
+        }
+    }
+
+    /**
+     * Handle gauge decrease from modifiers (e.g., Surcharge de Score)
+     * @param {number} amount - Amount to decrease
+     */
+    handleGaugeDecrease(amount) {
+        this.piecesWithoutClear = Math.max(0, this.piecesWithoutClear - amount);
+        this.emitUpdate();
+    }
+
+    /**
      * Handle lines cleared - reset gauge
      */
     handleLinesCleared() {
         this.piecesWithoutClear = 0;
+        this.emitUpdate();
+    }
 
+    /**
+     * Emit gauge update event
+     */
+    emitUpdate() {
         globalEvents.emit('dealGaugeUpdate', {
-            current: 0,
+            current: this.piecesWithoutClear,
             threshold: this.threshold,
-            percentage: 0
+            percentage: this.getPercentage()
         });
     }
 
@@ -77,12 +106,7 @@ export class DealSystem {
     reset() {
         this.piecesWithoutClear = 0;
         this.isTriggered = false;
-
-        globalEvents.emit('dealGaugeUpdate', {
-            current: 0,
-            threshold: this.threshold,
-            percentage: 0
-        });
+        this.emitUpdate();
     }
 
     /**
@@ -99,6 +123,8 @@ export class DealSystem {
     destroy() {
         globalEvents.off('pieceLocked', this.handlePieceLocked);
         globalEvents.off('linesCleared', this.handleLinesCleared);
+        globalEvents.off('dealGaugeIncrease', this.handleGaugeIncrease);
+        globalEvents.off('dealGaugeDecrease', this.handleGaugeDecrease);
     }
 }
 

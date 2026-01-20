@@ -93,8 +93,7 @@ class TetrisApp {
 
         // Initialize roguelite system
         this.roguelite = new RogueliteSystem({
-            bonusThreshold: 1000,  // Offer bonus every 1000 points
-            dealThreshold: 10      // Force malus after 10 pieces without clear
+            dealThreshold: 10  // Force malus after 10 pieces without clear
         });
         this.roguelite.init(this.game);
         this.game.rogueliteSystem = this.roguelite;
@@ -248,7 +247,6 @@ class TetrisApp {
 
         // Reinitialize roguelite for new game
         this.roguelite = new RogueliteSystem({
-            bonusThreshold: 1000,
             dealThreshold: 10
         });
         this.roguelite.init(this.game);

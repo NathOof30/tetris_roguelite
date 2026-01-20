@@ -89,6 +89,18 @@ export class ModifierManager {
     }
 
     /**
+     * Apply modifier effects to a spawned piece
+     * @param {Piece} piece - The piece to modify
+     */
+    applyToPiece(piece) {
+        for (const modifier of this.activeModifiers) {
+            if (modifier.modifySpawnedPiece) {
+                modifier.modifySpawnedPiece(piece, this.game);
+            }
+        }
+    }
+
+    /**
      * Add a modifier to the active list
      * @param {Modifier} modifier - Modifier instance
      */

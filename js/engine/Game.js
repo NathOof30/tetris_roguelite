@@ -155,13 +155,18 @@ export class Game extends EventEmitter {
         const deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
 
-        if (this.state === GameState.PLAYING) {
+        if (this.state === 'frozen') {
+            // Do nothing but render static frame
+        } else if (this.state === GameState.PLAYING) {
             this.update(deltaTime);
         } else if (this.state === GameState.LINE_CLEAR) {
             this.lineClearTimer -= deltaTime;
             if (this.lineClearTimer <= 0) {
-                this.state = GameState.PLAYING;
-                this.spawnPiece();
+                // Only switch to PLAYING if not frozen externally
+                if (this.state !== 'frozen') {
+                    this.state = GameState.PLAYING;
+                    this.spawnPiece();
+                }
             }
         }
 
@@ -244,8 +249,32 @@ export class Game extends EventEmitter {
     lockPiece() {
         if (!this.currentPiece) return;
 
-        const success = this.board.lockPiece(this.currentPiece);
+        // Verglas effect: Slide piece before locking
+        if (this.iceSlide) {
+            const slideDir = Math.random() > 0.5 ? 1 : -1;
+            if (this.canMove(slideDir, 0)) {
+                this.currentPiece.x += slideDir;
+                globalEvents.emit('notification', { text: '🧊 Glissade !', type: 'info' });
+            } else if (this.canMove(-slideDir, 0)) {
+                this.currentPiece.x -= slideDir;
+                globalEvents.emit('notification', { text: '🧊 Glissade !', type: 'info' });
+            }
+        }
+
+        // Prepare pixel options based on piece flags
+        const pixelOptions = {
+            isGold: this.currentPiece.isGold || false,
+            isCleaner: this.currentPiece.hasCleaner || false,
+            health: this.currentPiece.isStone ? 2 : 1
+        };
+
+        const success = this.board.lockPiece(this.currentPiece, pixelOptions);
         this.stats.piecesPlaced++;
+
+        // Apply granular gravity if piece was unstable
+        if (this.currentPiece.isUnstable) {
+            this.board.applyGranularGravity();
+        }
 
         this.emit('pieceLocked', this.currentPiece);
         globalEvents.emit('pieceLocked', this.currentPiece);
@@ -256,10 +285,10 @@ export class Game extends EventEmitter {
         }
 
         // Check for line clears
-        const { count, rows } = this.board.clearLines();
+        const { count, rows, goldCount, scoreMultiplier } = this.board.clearLines();
 
         if (count > 0) {
-            this.handleLineClears(count, rows);
+            this.handleLineClears(count, rows, goldCount, scoreMultiplier);
         } else {
             this.combo = 0;
             this.spawnPiece();
@@ -270,8 +299,10 @@ export class Game extends EventEmitter {
      * Handle line clears and scoring
      * @param {number} count - Number of lines cleared
      * @param {number[]} rows - Row indices that were cleared
+     * @param {number} goldCount - Number of gold pixels in cleared lines
+     * @param {number} scoreMultiplier - Score multiplier from gold pixels
      */
-    handleLineClears(count, rows) {
+    handleLineClears(count, rows, goldCount = 0, scoreMultiplier = 1) {
         // Update stats
         if (count === 1) this.stats.singles++;
         else if (count === 2) this.stats.doubles++;
@@ -306,6 +337,12 @@ export class Game extends EventEmitter {
         }
         this.combo++;
 
+        // Apply gold multiplier
+        if (scoreMultiplier > 1) {
+            points = Math.floor(points * scoreMultiplier);
+            globalEvents.emit('goldBonus', { goldCount, multiplier: scoreMultiplier, points });
+        }
+
         this.score += points;
         this.lines += count;
 
@@ -317,8 +354,8 @@ export class Game extends EventEmitter {
             globalEvents.emit('levelUp', this.level);
         }
 
-        this.emit('linesCleared', { count, rows, points });
-        globalEvents.emit('linesCleared', { count, rows, points });
+        this.emit('linesCleared', { count, rows, points, goldCount });
+        globalEvents.emit('linesCleared', { count, rows, points, goldCount });
 
         // Line clear animation delay
         this.state = GameState.LINE_CLEAR;
@@ -455,7 +492,18 @@ export class Game extends EventEmitter {
      * @returns {boolean} Success
      */
     hold() {
-        if (this.state !== GameState.PLAYING || !this.currentPiece || !this.canHold) {
+        if (this.state !== GameState.PLAYING || !this.currentPiece) {
+            return false;
+        }
+
+        // Bloc d'Or: disable hold on gold pieces
+        if (this.currentPiece.isGold) {
+            globalEvents.emit('notification', { text: '💰 Hold désactivé (pièce dorée)', type: 'warning' });
+            return false;
+        }
+
+        // Check if hold is allowed (unless infinite or double hold)
+        if (!this.canHold && !this.infiniteHold && !this.allowDoubleHold) {
             return false;
         }
 
@@ -471,7 +519,21 @@ export class Game extends EventEmitter {
         }
 
         this.holdPiece = currentType;
-        this.canHold = false;
+
+        // Réserve Infinie: always allow hold
+        if (!this.infiniteHold) {
+            // Échangeur Risqué: allow double hold (2 in a row)
+            if (this.allowDoubleHold) {
+                this._holdUseCount = (this._holdUseCount || 0) + 1;
+                if (this._holdUseCount >= 2) {
+                    this.canHold = false;
+                    this._holdUseCount = 0;
+                }
+            } else {
+                this.canHold = false;
+            }
+        }
+
         this.lockTimer = 0;
         this.lockMoves = 0;
 
