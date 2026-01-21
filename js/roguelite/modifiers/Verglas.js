@@ -18,6 +18,12 @@ export class Verglas extends Modifier {
         });
     }
 
+    modifySpawnedPiece(piece, game) {
+        piece.isIce = true;
+        // Optional: clear color to let ice effect dominate or keep it?
+        // Let's keep original color but the ice overlay will make it look icy
+    }
+
     onApply(game) {
         super.onApply(game);
 

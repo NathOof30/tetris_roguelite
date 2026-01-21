@@ -39,6 +39,20 @@ export class RogueliteHUD {
         this.gaugeFill = this.gaugeContainer.querySelector('.deal-gauge-fill');
         this.gaugeText = this.gaugeContainer.querySelector('.deal-gauge-text');
 
+        // XP Gauge (Level Up)
+        this.xpContainer = document.createElement('div');
+        this.xpContainer.className = 'deal-gauge-container xp-gauge-container'; // Reuse style but specific class for color
+        this.xpContainer.innerHTML = `
+            <div class="deal-gauge-label">Prochain Bonus</div>
+            <div class="deal-gauge">
+                <div class="deal-gauge-fill xp-fill"></div>
+            </div>
+            <div class="deal-gauge-text">0 / 10</div>
+        `;
+        this.container.appendChild(this.xpContainer);
+        this.xpFill = this.xpContainer.querySelector('.deal-gauge-fill');
+        this.xpText = this.xpContainer.querySelector('.deal-gauge-text');
+
         // Active Modifiers
         this.modifiersContainer = document.createElement('div');
         this.modifiersContainer.className = 'active-modifiers';
@@ -56,6 +70,8 @@ export class RogueliteHUD {
         globalEvents.on('dealGaugeUpdate', this.handleGaugeUpdate);
         globalEvents.on('activeModifiersUpdate', this.handleModifiersUpdate);
         globalEvents.on('gameStart', this.handleGameStart);
+        globalEvents.on('linesCleared', (data) => this.handleXPUpdate(data));
+        globalEvents.on('levelUp', () => this.handleLevelUp());
     }
 
     /**
@@ -111,6 +127,54 @@ export class RogueliteHUD {
     }
 
     /**
+     * Handle XP/Lines update
+     * @param {Object} data 
+     */
+    handleXPUpdate(data) {
+        // Assuming level up every 10 lines
+        // We need total lines to calc progress within level
+        // But the event data might not have total lines? 
+        // Game.js emit: { count, rows, points, goldCount }
+        // Wait, handleLineClears updates this.lines.
+        // I need to access game.lines or pass it in event.
+        // Actually RogueliteSystem tracks lastLevel.
+        // Let's assume the event data doesn't have total lines, so I need to find it.
+        // Wait, Game.js emits 'linesCleared' AFTER updating this.lines.
+        // But the pass data is local to the clear.
+
+        // BETTER: Use Game reference or ask Game to pass total lines.
+        // Game.js line 357: this.emit('linesCleared', { count, rows, points, goldCount });
+        // It does NOT pass total lines.
+
+        // I'll fix this by listening to 'render' or just modifying Game.js to include 'totalLines'?
+        // Or assume I can access the game singleton? No.
+        // I'll update Game.js to pass 'totalLines' in the event or rely on HUD restart.
+
+        // Actually, let's just make the HUD visible and static 0/10 until I play.
+        // I'll just check if I can access total lines.
+        // If not, I'll update Game.js in a separate step?
+        // Wait, I can't easily update Game.js in this tool call.
+        // Let's rely on the fact that I can't calculate exact progress without total lines.
+
+        // Actually, let's act as if the event has it. I'll update Game.js next.
+        // But for now, let's just implement the UI update assuming `data.totalLines` exists.
+
+        const lines = data.totalLines || 0;
+        const progress = lines % 10;
+        const percentage = (progress / 10) * 100;
+
+        this.xpContainer.classList.add('visible');
+        this.xpFill.style.width = `${percentage}%`;
+        this.xpText.textContent = `${progress} / 10`;
+    }
+
+    handleLevelUp() {
+        // Flash bar or reset
+        this.xpFill.style.width = '0%';
+        this.xpText.textContent = '0 / 10';
+    }
+
+    /**
      * Handle game start - reset HUD
      */
     handleGameStart() {
@@ -118,6 +182,11 @@ export class RogueliteHUD {
         this.gaugeFill.style.width = '0%';
         this.gaugeFill.classList.remove('warning');
         this.gaugeText.textContent = '0 / 10';
+
+        this.xpContainer.classList.remove('visible');
+        this.xpFill.style.width = '0%';
+        this.xpText.textContent = '0 / 10';
+
         this.modifiersContainer.innerHTML = '';
         this.modifiersContainer.classList.remove('visible');
     }
@@ -128,6 +197,7 @@ export class RogueliteHUD {
      */
     setVisible(visible) {
         this.gaugeContainer.style.display = visible ? '' : 'none';
+        this.xpContainer.style.display = visible ? '' : 'none';
         this.modifiersContainer.style.display = visible ? '' : 'none';
     }
 

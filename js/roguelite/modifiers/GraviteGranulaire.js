@@ -24,6 +24,7 @@ export class GraviteGranulaire extends Modifier {
         // Chance for unstable (granular gravity)
         if (Math.random() < this.unstableChance) {
             piece.isUnstable = true;
+            piece.isSand = true;
         }
 
         // Chance for stone (health = 2)

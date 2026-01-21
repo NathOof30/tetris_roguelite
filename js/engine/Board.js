@@ -22,7 +22,10 @@ export function createPixel(color, pattern, options = {}) {
         health: options.health || 1,  // Stone blocks have 2
         isRusted: options.isRusted || false,
         isCleaner: options.isCleaner || false,
-        isCracked: options.isCracked || false  // Visual state for damaged stone
+        isCracked: options.isCracked || false,  // Visual state for damaged stone
+        isIce: options.isIce || false,
+        isSand: options.isSand || false,
+        isManiaque: options.isManiaque || false
     };
 }
 
@@ -185,7 +188,10 @@ export class Board {
                     const pixel = createPixel(piece.color, piece.pattern, {
                         isGold: pixelOptions.isGold || false,
                         isCleaner: pixelOptions.isCleaner || false,
-                        health: pixelOptions.health || 1
+                        health: pixelOptions.health || 1,
+                        isIce: piece.isIce || false,
+                        isSand: piece.isSand || false,
+                        isManiaque: piece.isManiaque || false
                     });
 
                     // If this is a cleaner pixel hitting a special block, clean it

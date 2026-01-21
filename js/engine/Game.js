@@ -354,8 +354,8 @@ export class Game extends EventEmitter {
             globalEvents.emit('levelUp', this.level);
         }
 
-        this.emit('linesCleared', { count, rows, points, goldCount });
-        globalEvents.emit('linesCleared', { count, rows, points, goldCount });
+        this.emit('linesCleared', { count, rows, points, goldCount, totalLines: this.lines });
+        globalEvents.emit('linesCleared', { count, rows, points, goldCount, totalLines: this.lines });
 
         // Line clear animation delay
         this.state = GameState.LINE_CLEAR;

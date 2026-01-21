@@ -725,6 +725,22 @@
     }
 }
 
+/* XP Gauge Specifics */
+.deal-gauge-container.xp-gauge-container {
+    bottom: 70px;
+    /* Stack above deal gauge */
+}
+
+.xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg,
+            #4ade80 0%,
+            #3b82f6 100%);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
 /* Active Modifiers Display */
 .active-modifiers {
     position: absolute;

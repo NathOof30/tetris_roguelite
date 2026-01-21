@@ -143,6 +143,9 @@ export class Piece {
         this.isUnstable = false;    // Unstable piece (granular gravity)
         this.hasCleaner = false;    // Has cleaner pixel
         this.isStone = false;       // Stone piece (health = 2)
+        this.isIce = false;         // Ice piece (Verglas)
+        this.isSand = false;        // Sand piece (Gravité Granulaire)
+        this.isManiaque = false;    // Maniaque effect piece
 
         // Starting position (centered, above visible board)
         const shape = this.getShape();

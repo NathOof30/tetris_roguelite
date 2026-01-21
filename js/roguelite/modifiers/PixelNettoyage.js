@@ -22,8 +22,9 @@ export class PixelNettoyage extends Modifier {
     modifySpawnedPiece(piece, game) {
         if (Math.random() < this.cleanerChance) {
             piece.hasCleaner = true;
-            // Visual indicator - add cyan tint
-            piece.color = '#00ffff';
+            // Renderer handles the "glassy green" look via hasCleaner flag
+            // We can set a base green color if we want, but overlay does most work
+            piece.color = '#4ade80'; // Base green
         }
     }
 

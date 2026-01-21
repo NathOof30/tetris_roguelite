@@ -148,7 +148,9 @@ export class Renderer {
             isGold = false,
             isRusted = false,
             isCracked = false,
-            isCleaner = false
+            isCleaner = false,
+            isIce = false,
+            isSand = false
         } = options;
 
         const size = this.cellSize - this.padding * 2;
@@ -226,21 +228,64 @@ export class Renderer {
             this.ctx.stroke();
         }
 
+        if (isIce) {
+            // Ice efffect: glossy cyan/white
+            this.ctx.fillStyle = 'rgba(200, 240, 255, 0.4)';
+            this.ctx.fillRect(px, py, size, size);
+
+            // Glint
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            this.ctx.beginPath();
+            this.ctx.moveTo(px + size * 0.7, py);
+            this.ctx.lineTo(px + size, py);
+            this.ctx.lineTo(px + size, py + size * 0.3);
+            this.ctx.fill();
+        }
+
+        if (isSand) {
+            // Sand effect: beige + noise
+            this.ctx.fillStyle = '#e6c288'; // Sand beige
+            this.ctx.fillRect(px, py, size, size);
+
+            // Noise/Grains
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            for (let i = 0; i < 6; i++) {
+                const nx = px + Math.random() * size;
+                const ny = py + Math.random() * size;
+                this.ctx.fillRect(nx, ny, 2, 2);
+            }
+        }
+
         if (isRusted) {
-            // Rust texture
-            this.ctx.fillStyle = 'rgba(139, 69, 19, 0.3)';
-            for (let i = 0; i < 5; i++) {
-                const rx = px + (i * size / 5) + 2;
-                const ry = py + ((i * 7) % size);
-                this.ctx.fillRect(rx, ry, 3, 3);
+            // Rust texture - Enhanced
+            this.ctx.fillStyle = '#8b4513'; // Base rust
+            this.ctx.fillRect(px, py, size, size);
+
+            this.ctx.fillStyle = 'rgba(60, 20, 0, 0.4)';
+            for (let i = 0; i < 8; i++) {
+                const rx = px + Math.random() * size;
+                const ry = py + Math.random() * size;
+                this.ctx.fillRect(rx, ry, Math.random() * 3 + 1, Math.random() * 3 + 1);
             }
         }
 
         if (isCleaner) {
-            // Cleaner glow effect
-            this.ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
+            // Cleaner: Glass-like transparent green
+            this.ctx.fillStyle = 'rgba(50, 255, 100, 0.3)'; // Green tint
+            this.ctx.fillRect(px, py, size, size);
+
+            // Cleaner glow border
+            this.ctx.strokeStyle = 'rgba(100, 255, 150, 0.9)';
             this.ctx.lineWidth = 2;
             this.ctx.strokeRect(px + 2, py + 2, size - 4, size - 4);
+
+            // Sparkle
+            if (Math.random() < 0.05) {
+                this.ctx.fillStyle = '#ffffff';
+                const sx = px + Math.random() * size;
+                const sy = py + Math.random() * size;
+                this.ctx.fillRect(sx, sy, 2, 2);
+            }
         }
 
         // Colorblind pattern
@@ -319,7 +364,9 @@ export class Renderer {
                         isGold: pixel.isGold,
                         isRusted: pixel.isRusted,
                         isCracked: pixel.isCracked,
-                        isCleaner: pixel.isCleaner
+                        isCleaner: pixel.isCleaner,
+                        isIce: pixel.isIce,
+                        isSand: pixel.isSand
                     });
                 }
             }
@@ -344,7 +391,12 @@ export class Renderer {
                     if (y >= 0) {
                         this.drawCell(piece.x + col, y, piece.color, {
                             pattern: piece.pattern,
-                            colorblind
+                            colorblind,
+                            isGold: piece.isGold,
+                            isCleaner: piece.hasCleaner,
+                            isRusted: piece.isRusted, // Although usually applied to board
+                            isIce: piece.isIce,
+                            isSand: piece.isSand
                         });
                     }
                 }
